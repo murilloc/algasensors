@@ -1,37 +1,23 @@
 package com.murilloc.algasensors.device.management.api.client.impl;
 
+import com.murilloc.algasensors.device.management.api.client.RestClientFactory;
 import com.murilloc.algasensors.device.management.api.client.SensorMonitoringClient;
-import com.murilloc.algasensors.device.management.api.client.SensorMonitoringClientBadGatewayException;
+import com.murilloc.algasensors.device.management.api.model.SensorMonitoringOutput;
 import io.hypersistence.tsid.TSID;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import java.time.Duration;
 
-
-@Component
+//@Component
 public class SensorMonitoringClientImpl implements SensorMonitoringClient {
 
     private final RestClient restClient;
 
-    public SensorMonitoringClientImpl(RestClient.Builder builder) {
-        this.restClient = builder.baseUrl("http://localhost:8082")
-                .requestFactory(generateClientHttpRequestFactory())
-                .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
-                    throw new SensorMonitoringClientBadGatewayException();
-                })
-                .build();
+    public SensorMonitoringClientImpl(RestClientFactory restClientFactory) {
+        this.restClient =  restClientFactory.temperatureMonitoringRestClient();
     }
 
-    private ClientHttpRequestFactory generateClientHttpRequestFactory() {
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(Duration.ofSeconds(3));
-        factory.setReadTimeout(Duration.ofSeconds(5));
-        return factory;
-    }
+
 
     @Override
     public void enableMonitoring(TSID sensorId) {
@@ -48,6 +34,16 @@ public class SensorMonitoringClientImpl implements SensorMonitoringClient {
                 .uri("/api/sensors/{sensorId}/monitoring/enable", sensorId)
                 .retrieve()
                 .toBodilessEntity();
+
+    }
+
+    @Override
+    public SensorMonitoringOutput getDetail(TSID sensorId) {
+        return restClient.get()
+                .uri("/api/sensors/{sensorId}/monitoring", sensorId)
+                .retrieve()
+                .body(SensorMonitoringOutput.class);
+
 
     }
 }

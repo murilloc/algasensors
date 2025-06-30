@@ -2,7 +2,9 @@ package com.murilloc.algasensors.device.management.api.controller;
 
 
 import com.murilloc.algasensors.device.management.api.client.SensorMonitoringClient;
+import com.murilloc.algasensors.device.management.api.model.SensorDetailOutput;
 import com.murilloc.algasensors.device.management.api.model.SensorInput;
+import com.murilloc.algasensors.device.management.api.model.SensorMonitoringOutput;
 import com.murilloc.algasensors.device.management.api.model.SensorOutput;
 import com.murilloc.algasensors.device.management.common.IdGenerator;
 import com.murilloc.algasensors.device.management.domain.model.Sensor;
@@ -80,6 +82,22 @@ public class SensorController {
         sensorRepository.saveAndFlush(sensor);
 
         sensorMonitoringClient.disableMonitoring(sensorId);
+    }
+
+
+    @GetMapping("{sensorId}/detail")
+    public SensorDetailOutput getOneWithDetail(@PathVariable TSID sensorId) {
+        Sensor sensor = sensorRepository.findById(new SensorId(sensorId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found"));
+
+        SensorMonitoringOutput monitoringOutput = sensorMonitoringClient.getDetail(sensorId);
+        SensorOutput sensorOutput = convertToModel(sensor);
+
+
+        return SensorDetailOutput.builder()
+                .monitoring(monitoringOutput)
+                .sensor(sensorOutput)
+                .build();
     }
 
     @DeleteMapping("{sensorId}")
