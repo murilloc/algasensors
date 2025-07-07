@@ -4,7 +4,7 @@ package com.murilloc.algasensors.temperature.monitoring.api.controller;
 import com.murilloc.algasensors.temperature.monitoring.api.model.SensorMonitoringOutput;
 import com.murilloc.algasensors.temperature.monitoring.domain.model.SensorId;
 import com.murilloc.algasensors.temperature.monitoring.domain.model.SensorMonitoring;
-import com.murilloc.algasensors.temperature.monitoring.domain.repository.SensorMonitoryRepository;
+import com.murilloc.algasensors.temperature.monitoring.domain.repository.SensorMonitoringRepository;
 import io.hypersistence.tsid.TSID;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
@@ -17,10 +17,10 @@ import java.time.Duration;
 @RequestMapping("/api/sensors/{sensorId}/monitoring")
 public class SensorMonitoringController {
 
-    private final SensorMonitoryRepository sensorMonitoryRepository;
+    private final SensorMonitoringRepository sensorMonitoringRepository;
 
-    public SensorMonitoringController(SensorMonitoryRepository sensorMonitoryRepository) {
-        this.sensorMonitoryRepository = sensorMonitoryRepository;
+    public SensorMonitoringController(SensorMonitoringRepository sensorMonitoringRepository) {
+        this.sensorMonitoringRepository = sensorMonitoringRepository;
     }
 
 
@@ -37,7 +37,7 @@ public class SensorMonitoringController {
 
 
     private SensorMonitoring findByIdOrDefault(TSID sensorId) {
-        return sensorMonitoryRepository.findById(new SensorId(sensorId))
+        return sensorMonitoringRepository.findById(new SensorId(sensorId))
                 .orElse(SensorMonitoring.builder()
                         .id(new SensorId(sensorId))
                         .enabled(false)
@@ -54,7 +54,7 @@ public class SensorMonitoringController {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Sensor Monitoring already enabled");
         }
         sensorMonitoring.setEnabled(true);
-        sensorMonitoryRepository.saveAndFlush(sensorMonitoring);
+        sensorMonitoringRepository.saveAndFlush(sensorMonitoring);
     }
 
 
@@ -68,7 +68,7 @@ public class SensorMonitoringController {
             Thread.sleep(Duration.ofSeconds(10).toMillis());
         }
         sensorMonitoring.setEnabled(false);
-        sensorMonitoryRepository.saveAndFlush(sensorMonitoring);
+        sensorMonitoringRepository.saveAndFlush(sensorMonitoring);
     }
 
 

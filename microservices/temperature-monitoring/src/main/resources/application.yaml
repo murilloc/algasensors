@@ -6,7 +6,7 @@ spring:
     name: temperature-monitoring
   datasource:
     username: sa
-    url: jdbc:h2:file:~/temperature-monitoring-db;CASE_INSENSITIVE_IDENTIFIERS=TRUE;
+    url: jdbc:h2:file:~/temperature-monitoring-db;CASE_INSENSITIVE_IDENTIFIERS=TRUE;AUTO_SERVER=TRUE
     driverClassName: org.h2.Driver
     password: '123'
   h2:
@@ -17,5 +17,13 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
-    show-sql: 'true'
+    show-sql: 'false'
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: rabbitmq
+    password: rabbitmq
+    listener:
+      simple:
+        prefetch: 4
 

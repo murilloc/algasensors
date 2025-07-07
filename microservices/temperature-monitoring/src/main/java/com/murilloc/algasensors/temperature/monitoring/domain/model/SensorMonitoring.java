@@ -27,5 +27,7 @@ public class SensorMonitoring {
     private Boolean enabled;
 
 
-
+    public boolean isEnabled() {
+        return Boolean.TRUE.equals(enabled);
+    }
 }

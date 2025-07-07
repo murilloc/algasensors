@@ -1,4 +1,4 @@
-package com.murilloc.algasensors.temperature.monitoring.api.config.jackson;
+package com.murilloc.algasensors.temperature.processing.api.config.jackson;
 
 
 import com.fasterxml.jackson.databind.Module;
@@ -15,7 +15,6 @@ public class TSIDJacksonConfig {
 
         SimpleModule module = new SimpleModule();
         module.addSerializer(TSID.class, new TSIDToStringSerializer());
-        module.addDeserializer(TSID.class, new StringToTSIDDeserializer());
         return module;
 
     }

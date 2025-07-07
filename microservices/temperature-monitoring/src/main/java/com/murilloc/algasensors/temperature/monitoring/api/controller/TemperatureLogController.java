@@ -1,7 +1,7 @@
 package com.murilloc.algasensors.temperature.monitoring.api.controller;
 
 
-import com.murilloc.algasensors.temperature.monitoring.api.model.TemperatureLogOutput;
+import com.murilloc.algasensors.temperature.monitoring.api.model.TemperatureLogData;
 import com.murilloc.algasensors.temperature.monitoring.domain.model.SensorId;
 import com.murilloc.algasensors.temperature.monitoring.domain.model.TemperatureLog;
 import com.murilloc.algasensors.temperature.monitoring.domain.repository.TemperatureLogRepository;
@@ -23,9 +23,9 @@ public class TemperatureLogController {
     private final TemperatureLogRepository temperatureLogRepository;
 
     @GetMapping
-    public Page<TemperatureLogOutput> getTemperatureLogs(@PathVariable TSID sensorId, @PageableDefault Pageable pageable) {
+    public Page<TemperatureLogData> getTemperatureLogs(@PathVariable TSID sensorId, @PageableDefault Pageable pageable) {
         Page<TemperatureLog> temeratureLogs = temperatureLogRepository.findAllBySensorId(new SensorId(sensorId), pageable);
-        return temeratureLogs.map(temperatureLog -> TemperatureLogOutput.builder()
+        return temeratureLogs.map(temperatureLog -> TemperatureLogData.builder()
                 .id(temperatureLog.getId().getValue())
                 .value(temperatureLog.getValue())
                 .registeredAt(temperatureLog.getRegisteredAt())
