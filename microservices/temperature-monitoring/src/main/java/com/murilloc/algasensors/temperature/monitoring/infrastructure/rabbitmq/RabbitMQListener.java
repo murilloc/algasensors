@@ -1,8 +1,8 @@
 package com.murilloc.algasensors.temperature.monitoring.infrastructure.rabbitmq;
 
 import com.murilloc.algasensors.temperature.monitoring.api.model.TemperatureLogData;
+import com.murilloc.algasensors.temperature.monitoring.domain.service.SensorAlertService;
 import com.murilloc.algasensors.temperature.monitoring.domain.service.TemperatureMonitoringService;
-import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +20,21 @@ import java.util.Map;
 public class RabbitMQListener {
 
     private  final TemperatureMonitoringService temperatureMonitoringService;
+    private final SensorAlertService sensorAlertService;
 
-    @RabbitListener(queues = RabbitMQConfig.QUEUE_NAME, concurrency = "2-3")
+    @RabbitListener(queues = RabbitMQConfig.QUEUE_PROCESS_TEMPERATURE_NAME, concurrency = "2-3")
     @SneakyThrows
-    public void processTemperature(@Payload TemperatureLogData temperatureLogData, @Headers Map<String, Object> headers) {
+    public void processTemperatureProcessing(@Payload TemperatureLogData temperatureLogData, @Headers Map<String, Object> headers) {
 
         temperatureMonitoringService.processTemperatureReading(temperatureLogData);
-        Thread.sleep(Duration.ofSeconds(5));
+        //Thread.sleep(Duration.ofSeconds(5));
+    }
 
+    @RabbitListener(queues = RabbitMQConfig.QUEUE_ALERTING_NAME, concurrency = "2-3")
+    @SneakyThrows
+    public void processAlerting(@Payload TemperatureLogData temperatureLogData, @Headers Map<String, Object> headers) {
+
+        sensorAlertService.handleAlerting(temperatureLogData);
+        Thread.sleep(Duration.ofSeconds(5));
     }
 }

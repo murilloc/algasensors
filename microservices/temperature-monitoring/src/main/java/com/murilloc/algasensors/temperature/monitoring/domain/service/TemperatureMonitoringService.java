@@ -25,6 +25,14 @@ public class TemperatureMonitoringService {
 
     @Transactional
     public void processTemperatureReading(TemperatureLogData temperatureLogData) {
+        log.info("Processing temperature reading for sensor {} with value {} at {}",
+                temperatureLogData.getSensorId(),
+                temperatureLogData.getValue(),
+                temperatureLogData.getRegisteredAt());
+
+        if(temperatureLogData.getValue().equals(10.6)) {
+            throw new RuntimeException("somente para efeito de retry-test: " + temperatureLogData.getValue());
+        }
 
         sensorMonitoringRepository.findById(new SensorId(temperatureLogData.getSensorId()))
 

@@ -8,12 +8,17 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String QUEUE_NAME = "temperature-monitoring.process-temperature.v1.q";
+    private static final String PROCESS_TEMPERATURE_NAME = "temperature-monitoring.process-temperature.v1";
+    public static final String DEAD_LETTER_QUEUE_PROCESS_TEMPERATURE_NAME = PROCESS_TEMPERATURE_NAME + ".dlq";
+    public static final String QUEUE_PROCESS_TEMPERATURE_NAME = PROCESS_TEMPERATURE_NAME + ".q";
+    public static final String QUEUE_ALERTING_NAME = "temperature-monitoring.alerting.v1.q";
 
-    
 
     @Bean
     public Jackson2JsonMessageConverter jackson2JsonMessageConverter(ObjectMapper objectMapper) {
@@ -26,18 +31,46 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue queue(){
-        return QueueBuilder.durable(QUEUE_NAME).build();
+    public Queue queueAlerting() {
+        return QueueBuilder.durable(QUEUE_ALERTING_NAME).build();
     }
 
-    public FanoutExchange exchange(){
-        return ExchangeBuilder.fanoutExchange("temperature-processing.temperature-received.v1.e")
+    @Bean
+    public Queue queueProcessTemperature() {
+
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("x-dead-letter-exchange", "");
+        arguments.put("x-dead-letter-routing-key", DEAD_LETTER_QUEUE_PROCESS_TEMPERATURE_NAME);
+
+        return QueueBuilder.durable(QUEUE_PROCESS_TEMPERATURE_NAME)
+                .withArguments(arguments)
                 .build();
     }
 
     @Bean
-    public Binding binding(){
-        return BindingBuilder.bind(queue())
+    public Queue deadLetterQueueProcessTemperature() {
+
+        return QueueBuilder.durable(DEAD_LETTER_QUEUE_PROCESS_TEMPERATURE_NAME)
+                .build();
+    }
+
+    public FanoutExchange exchange() {
+        return ExchangeBuilder.fanoutExchange("temperature-processing.temperature-received.v1.e")
+                .build();
+    }
+
+
+    @Bean
+    public Binding bindingAlerting() {
+        return BindingBuilder.bind(queueAlerting())
                 .to(exchange());
     }
+
+    @Bean
+    public Binding bindingProcessTemperatureAlerting() {
+        return BindingBuilder.bind(queueProcessTemperature())
+                .to(exchange());
+    }
+
+
 }

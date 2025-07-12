@@ -11,45 +11,48 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/sensors")
 @RequiredArgsConstructor
 public class SensorAlertController {
 
-    private SensorAlertRepository sensorAlertRepository;
+    private final SensorAlertRepository sensorAlertRepository;
+
 
 
     @GetMapping("{sensorId}/alert")
     @ResponseStatus(HttpStatus.OK)
     public SensorAlertOutput getSensorAlert(@PathVariable TSID sensorId) {
-        SensorAlert sensorAlert = sensorAlertRepository.findById(new SensorAlertId(sensorId));
-        if (sensorAlert == null) {
+        Optional<SensorAlert> sensorAlert = sensorAlertRepository.findById(new SensorAlertId(sensorId));
+        if (sensorAlert.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor alert not found");
         }
         return SensorAlertOutput.builder()
-                .id(sensorAlert.getId().getValue())
-                .maxTemperature(sensorAlert.getMaxTemperature())
-                .minTemperature(sensorAlert.getMinTemperature())
+                .id(sensorAlert.get().getId().getValue())
+                .maxTemperature(sensorAlert.get().getMaxTemperature())
+                .minTemperature(sensorAlert.get().getMinTemperature())
                 .build();
     }
 
     @PutMapping("/{sensorId}/alert")
     public SensorAlertOutput createOrUpdateSensorAlert(@PathVariable TSID sensorId, @RequestBody SensorAlertInput input) {
         SensorAlertId alertId = new SensorAlertId(sensorId);
-        SensorAlert sensorAlert = sensorAlertRepository.findById(alertId);
-        if (sensorAlert == null) {
-            sensorAlert = SensorAlert.builder()
+        Optional<SensorAlert> sensorAlert = sensorAlertRepository.findById(alertId);
+        if (sensorAlert.isEmpty()) {
+            sensorAlert = Optional.ofNullable(SensorAlert.builder()
                     .id(alertId)
-                    .build();
+                    .build());
         }
-        sensorAlert.setMaxTemperature(input.getMaxTemperature());
-        sensorAlert.setMinTemperature(input.getMinTemperature());
-        sensorAlertRepository.save(sensorAlert);
+        sensorAlert.get().setMaxTemperature(input.getMaxTemperature());
+        sensorAlert.get().setMinTemperature(input.getMinTemperature());
+        sensorAlertRepository.save(sensorAlert.get());
 
         return SensorAlertOutput.builder()
-                .id(sensorAlert.getId().getValue())
-                .maxTemperature(sensorAlert.getMaxTemperature())
-                .minTemperature(sensorAlert.getMinTemperature())
+                .id(sensorAlert.get().getId().getValue())
+                .maxTemperature(sensorAlert.get().getMaxTemperature())
+                .minTemperature(sensorAlert.get().getMinTemperature())
                 .build();
     }
 
@@ -57,10 +60,10 @@ public class SensorAlertController {
     @DeleteMapping("/{sensorId}/alert")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteSensorAlert(@PathVariable TSID sensorId) {
-        SensorAlert sensorAlert = sensorAlertRepository.findById(new SensorAlertId(sensorId));
-        if (sensorAlert == null) {
+        Optional<SensorAlert> sensorAlert = sensorAlertRepository.findById(new SensorAlertId(sensorId));
+        if (sensorAlert.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor alert not found");
         }
-        sensorAlertRepository.delete(sensorAlert);
+        sensorAlertRepository.delete(sensorAlert.get());
     }
 }

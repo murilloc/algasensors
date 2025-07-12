@@ -4,11 +4,15 @@ import com.murilloc.algasensors.temperature.monitoring.domain.model.SensorAlert;
 import com.murilloc.algasensors.temperature.monitoring.domain.model.SensorAlertId;
 import org.springframework.data.repository.Repository;
 
+
+import java.util.Optional;
+
+
 public interface SensorAlertRepository extends Repository<SensorAlert, SensorAlertId> {
 
-   SensorAlert findById(SensorAlertId sensorAlertId);
+   Optional<SensorAlert> findById(SensorAlertId sensorAlertId);
 
-   void save(SensorAlert sensorAlert);
+   SensorAlert save(SensorAlert sensorAlert);
 
    void delete(SensorAlert sensorAlert);
 }
